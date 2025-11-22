@@ -1,0 +1,77 @@
+[user]
+	# IMPORTANT: Set these to your own values!
+	# Do not commit your real name/email to public repos
+	name = YOUR_NAME
+	email = YOUR_EMAIL
+
+[core]
+	editor = nvim
+	pager = delta
+	excludesfile = ~/.gitignore_global
+
+[init]
+	defaultBranch = main
+
+[pull]
+	rebase = false
+
+[push]
+	default = simple
+	autoSetupRemote = true
+
+[fetch]
+	prune = true
+
+[diff]
+	colorMoved = default
+
+[merge]
+	conflictstyle = diff3
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	navigate = true
+	side-by-side = true
+	line-numbers = true
+	syntax-theme = TwoDark
+
+[alias]
+	# Short status
+	s = status -sb
+
+	# Pretty log
+	l = log --oneline --graph --decorate --all
+	lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+
+	# Undo last commit (keep changes)
+	undo = reset HEAD~1 --soft
+
+	# Amend last commit
+	amend = commit --amend --no-edit
+
+	# Show what I did today
+	today = log --since=midnight --author='YOUR_NAME' --oneline
+
+	# Clean up merged branches
+	cleanup = "!git branch --merged | grep -v '\\*\\|main\\|master\\|develop' | xargs -n 1 git branch -d"
+
+[color]
+	ui = auto
+
+[color "branch"]
+	current = yellow reverse
+	local = yellow
+	remote = green
+
+[color "diff"]
+	meta = yellow bold
+	frag = magenta bold
+	old = red
+	new = green
+
+[color "status"]
+	added = yellow
+	changed = green
+	untracked = cyan

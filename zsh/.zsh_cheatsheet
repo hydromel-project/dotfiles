@@ -1,0 +1,458 @@
+# ============================================================================
+# Interactive Cheat Sheet System
+# Quick-access help for all commands and keystrokes
+# ============================================================================
+
+# Color definitions
+_CHEAT_BOLD='\033[1m'
+_CHEAT_DIM='\033[2m'
+_CHEAT_BLUE='\033[1;34m'
+_CHEAT_CYAN='\033[1;36m'
+_CHEAT_GREEN='\033[1;32m'
+_CHEAT_YELLOW='\033[1;33m'
+_CHEAT_MAGENTA='\033[1;35m'
+_CHEAT_RED='\033[1;31m'
+_CHEAT_RESET='\033[0m'
+
+# ============================================================================
+# Helper Functions
+# ============================================================================
+
+_cheat_header() {
+  local title="$1"
+  local width=67
+  local title_len=${#title}
+  local padding=$(( (width - title_len) / 2 ))
+  local padded_title=$(printf "%${padding}s%s%${padding}s" "" "$title" "")
+
+  echo -e "${_CHEAT_CYAN}╔═══════════════════════════════════════════════════════════════════╗${_CHEAT_RESET}"
+  echo -e "${_CHEAT_CYAN}║${_CHEAT_RESET}${_CHEAT_BOLD}$(printf '%-67s' "$padded_title")${_CHEAT_RESET}${_CHEAT_CYAN}║${_CHEAT_RESET}"
+  echo -e "${_CHEAT_CYAN}╚═══════════════════════════════════════════════════════════════════╝${_CHEAT_RESET}"
+  echo ""
+}
+
+_cheat_section() {
+  local title="$1"
+  echo -e "${_CHEAT_YELLOW}━━━ ${title} $(printf '━%.0s' {1..67} | cut -c1-$((67 - ${#title} - 5)))${_CHEAT_RESET}"
+  echo ""
+}
+
+_cheat_cmd() {
+  local cmd="$1"
+  local desc="$2"
+  printf "  ${_CHEAT_GREEN}%-18s${_CHEAT_RESET} %s\n" "$cmd" "$desc"
+}
+
+# ============================================================================
+# Cheat Sheet Data
+# ============================================================================
+
+_cheatsheet_keyboard() {
+  echo -e "${_CHEAT_CYAN}╔═══════════════════════════════════════════════════════════════════╗${_CHEAT_RESET}"
+  echo -e "${_CHEAT_CYAN}║${_CHEAT_RESET}${_CHEAT_BOLD}                    KEYBOARD SHORTCUTS                              ${_CHEAT_RESET}${_CHEAT_CYAN}║${_CHEAT_RESET}"
+  echo -e "${_CHEAT_CYAN}╚═══════════════════════════════════════════════════════════════════╝${_CHEAT_RESET}"
+  echo ""
+  echo -e "${_CHEAT_YELLOW}━━━ TERMINAL NAVIGATION ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${_CHEAT_RESET}"
+  echo ""
+  echo -e "  ${_CHEAT_GREEN}Ctrl + a${_CHEAT_RESET}          Move to beginning of line"
+  echo -e "  ${_CHEAT_GREEN}Ctrl + e${_CHEAT_RESET}          Move to end of line"
+  echo -e "  ${_CHEAT_GREEN}Ctrl + b${_CHEAT_RESET}          Move back one character"
+  echo -e "  ${_CHEAT_GREEN}Ctrl + f${_CHEAT_RESET}          Move forward one character"
+  echo -e "  ${_CHEAT_GREEN}Alt + b${_CHEAT_RESET}           Move back one word"
+  echo -e "  ${_CHEAT_GREEN}Alt + f${_CHEAT_RESET}           Move forward one word"
+  echo ""
+  echo -e "${_CHEAT_YELLOW}━━━ EDITING ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${_CHEAT_RESET}"
+  echo ""
+  echo -e "  ${_CHEAT_GREEN}Ctrl + k${_CHEAT_RESET}          Delete from cursor to end of line"
+  echo -e "  ${_CHEAT_GREEN}Ctrl + u${_CHEAT_RESET}          Delete from cursor to beginning of line"
+  echo -e "  ${_CHEAT_GREEN}Ctrl + w${_CHEAT_RESET}          Delete word before cursor"
+  echo -e "  ${_CHEAT_GREEN}Alt + d${_CHEAT_RESET}           Delete word after cursor"
+  echo -e "  ${_CHEAT_GREEN}Ctrl + y${_CHEAT_RESET}          Paste (yank) last deleted text"
+  echo -e "  ${_CHEAT_GREEN}Ctrl + _${_CHEAT_RESET}          Undo last edit"
+  echo ""
+  echo -e "${_CHEAT_YELLOW}━━━ HISTORY ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${_CHEAT_RESET}"
+  echo ""
+  echo -e "  ${_CHEAT_GREEN}Ctrl + r${_CHEAT_RESET}          Search command history (fzf)"
+  echo -e "  ${_CHEAT_GREEN}Ctrl + p${_CHEAT_RESET}          Previous command"
+  echo -e "  ${_CHEAT_GREEN}Ctrl + n${_CHEAT_RESET}          Next command"
+  echo -e "  ${_CHEAT_GREEN}!!${_CHEAT_RESET}                Repeat last command"
+  echo -e "  ${_CHEAT_GREEN}!\$${_CHEAT_RESET}                Last argument of previous command"
+  echo -e "  ${_CHEAT_GREEN}!*${_CHEAT_RESET}                All arguments of previous command"
+  echo ""
+  echo -e "${_CHEAT_YELLOW}━━━ FZF SHORTCUTS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${_CHEAT_RESET}"
+  echo ""
+  echo -e "  ${_CHEAT_GREEN}Ctrl + t${_CHEAT_RESET}          File/directory fuzzy finder"
+  echo -e "  ${_CHEAT_GREEN}Ctrl + r${_CHEAT_RESET}          Command history search"
+  echo -e "  ${_CHEAT_GREEN}Alt + c${_CHEAT_RESET}           Directory fuzzy finder (cd)"
+  echo -e "  ${_CHEAT_GREEN}Ctrl + f${_CHEAT_RESET}          Tmux session switcher"
+  echo ""
+  echo -e "${_CHEAT_YELLOW}━━━ PROCESS CONTROL ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${_CHEAT_RESET}"
+  echo ""
+  echo -e "  ${_CHEAT_GREEN}Ctrl + c${_CHEAT_RESET}          Kill current process"
+  echo -e "  ${_CHEAT_GREEN}Ctrl + z${_CHEAT_RESET}          Suspend current process"
+  echo -e "  ${_CHEAT_GREEN}Ctrl + d${_CHEAT_RESET}          Exit shell / EOF"
+  echo -e "  ${_CHEAT_GREEN}Ctrl + l${_CHEAT_RESET}          Clear screen"
+  echo -e "  ${_CHEAT_GREEN}Ctrl + s${_CHEAT_RESET}          Freeze terminal output"
+  echo -e "  ${_CHEAT_GREEN}Ctrl + q${_CHEAT_RESET}          Resume terminal output"
+  echo ""
+  echo -e "${_CHEAT_YELLOW}━━━ TMUX (if using tmux) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${_CHEAT_RESET}"
+  echo ""
+  echo -e "  ${_CHEAT_MAGENTA}Prefix: Ctrl + a${_CHEAT_RESET}  (instead of default Ctrl + b)"
+  echo ""
+  echo -e "  ${_CHEAT_GREEN}Ctrl + a, c${_CHEAT_RESET}       New window"
+  echo -e "  ${_CHEAT_GREEN}Ctrl + a, |${_CHEAT_RESET}       Split vertical"
+  echo -e "  ${_CHEAT_GREEN}Ctrl + a, -${_CHEAT_RESET}       Split horizontal"
+  echo -e "  ${_CHEAT_GREEN}Ctrl + a, h/j/k/l${_CHEAT_RESET} Navigate panes"
+  echo -e "  ${_CHEAT_GREEN}Ctrl + a, d${_CHEAT_RESET}       Detach session"
+  echo -e "  ${_CHEAT_GREEN}Ctrl + a, [${_CHEAT_RESET}       Copy mode (vim keys)"
+  echo ""
+  echo -e "${_CHEAT_YELLOW}━━━ CUSTOM SHORTCUTS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${_CHEAT_RESET}"
+  echo ""
+  echo -e "  ${_CHEAT_GREEN}Tab${_CHEAT_RESET}               Auto-complete"
+  echo -e "  ${_CHEAT_GREEN}Tab Tab${_CHEAT_RESET}           Show all completions"
+  echo -e "  ${_CHEAT_GREEN}Ctrl + x, Ctrl + e${_CHEAT_RESET} Edit command in \$EDITOR"
+  echo ""
+  echo -e "${_CHEAT_YELLOW}━━━ AUTOSUGGESTIONS ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${_CHEAT_RESET}"
+  echo ""
+  echo -e "  ${_CHEAT_GREEN}→ (Right Arrow)${_CHEAT_RESET}   Accept entire suggestion"
+  echo -e "  ${_CHEAT_GREEN}Ctrl + Space${_CHEAT_RESET}      Accept entire suggestion (quick)"
+  echo -e "  ${_CHEAT_GREEN}Ctrl + → ${_CHEAT_RESET}         Accept one word"
+  echo -e "  ${_CHEAT_GREEN}Ctrl + X${_CHEAT_RESET}          Clear suggestion"
+  echo -e "  ${_CHEAT_GREEN}ESC ESC${_CHEAT_RESET}           Add 'sudo' to command"
+  echo ""
+}
+
+_cheatsheet_commands() {
+  _cheat_header "COMMAND REFERENCE"
+
+  _cheat_section "NAVIGATION"
+  _cheat_cmd ".." "cd ../"
+  _cheat_cmd "..2" "cd ../../"
+  _cheat_cmd "..3" "cd ../../../"
+  _cheat_cmd "mkcd <dir>" "mkdir + cd in one command"
+  _cheat_cmd "cdl <dir>" "cd + ls in one command"
+  _cheat_cmd "groot" "Go to git repository root"
+  _cheat_cmd "dev" "cd ~/dev"
+  _cheat_cmd "dots" "cd ~/dotfiles"
+  echo ""
+
+  _cheat_section "SEARCH & FIND"
+  _cheat_cmd "search <text>" "Search files for text (ripgrep)"
+  _cheat_cmd "ff <pattern>" "Find files by name"
+  _cheat_cmd "fe <pattern>" "Find file and edit (fzf preview)"
+  _cheat_cmd "fd_dir <pattern>" "Find directories only"
+  _cheat_cmd "hist <term>" "Search command history"
+  _cheat_cmd "psgrep <name>" "Find process by name"
+  _cheat_cmd "killp <name>" "Kill process (interactive)"
+  echo ""
+
+  _cheat_section "PROJECT MANAGEMENT"
+  _cheat_cmd "padd [name]" "Bookmark current directory"
+  _cheat_cmd "p" "Jump to bookmarked project"
+  _cheat_cmd "plist" "List all projects"
+  _cheat_cmd "prem" "Remove project bookmark"
+  _cheat_cmd "newproject <nm>" "Create new project"
+  echo ""
+
+  _cheat_section "GIT SHORTCUTS"
+  _cheat_cmd "gst" "git status (short)"
+  _cheat_cmd "gac \"msg\"" "add + commit"
+  _cheat_cmd "gacp \"msg\"" "add + commit + push"
+  _cheat_cmd "gca" "commit --amend"
+  _cheat_cmd "gundo" "Undo last commit"
+  _cheat_cmd "gclean" "Delete merged branches"
+  _cheat_cmd "gbr" "Branches by date"
+  _cheat_cmd "glast" "Last commit stats"
+  echo ""
+
+  _cheat_section "FILE OPERATIONS"
+  _cheat_cmd "backup <file>" "Create timestamped backup"
+  _cheat_cmd "extract <file>" "Extract any archive"
+  _cheat_cmd "cpy <file>" "Copy to clipboard"
+  _cheat_cmd "pwdc" "Copy current path"
+  echo ""
+
+  _cheat_section "SYSTEM & UTILITIES"
+  _cheat_cmd "serve [port]" "Start web server (8000)"
+  _cheat_cmd "duh" "Disk usage (sorted)"
+  _cheat_cmd "myip" "Show public IP"
+  _cheat_cmd "ports" "List open ports"
+  _cheat_cmd "please" "Rerun with sudo"
+  _cheat_cmd "reload" "Reload shell"
+  echo ""
+
+  _cheat_section "QUICK EDITS"
+  _cheat_cmd "zshrc" "Edit .zshrc"
+  _cheat_cmd "zshprod" "Edit productivity config"
+  _cheat_cmd "tmuxconf" "Edit .tmux.conf"
+  _cheat_cmd "gitconf" "Edit .gitconfig"
+  echo ""
+
+  _cheat_section "MODERN TOOLS"
+  _cheat_cmd "ls → eza" "Better ls with icons"
+  _cheat_cmd "cat → bat" "Syntax highlighting"
+  _cheat_cmd "grep → rg" "Ripgrep"
+  _cheat_cmd "cd → z" "Zoxide (smart cd)"
+  echo ""
+
+  _cheat_section "HELP"
+  _cheat_cmd "F1 / help" "Interactive cheat menu"
+  _cheat_cmd "cheat keys" "Keyboard shortcuts"
+  _cheat_cmd "cheat git" "Git commands"
+  _cheat_cmd "ph" "Productivity help"
+  echo ""
+}
+
+_cheatsheet_git() {
+  _cheat_header "GIT CHEAT SHEET"
+
+  _cheat_section "DAILY WORKFLOW"
+  _cheat_cmd "gst" "Quick status check"
+  _cheat_cmd "gac \"message\"" "Add all + commit"
+  _cheat_cmd "gacp \"message\"" "Add all + commit + push"
+  _cheat_cmd "gpr" "Pull with rebase"
+  _cheat_cmd "gca" "Amend last commit (no edit)"
+  _cheat_cmd "gundo" "Undo commit (keep changes)"
+  echo ""
+
+  _cheat_section "BRANCHING"
+  _cheat_cmd "git branch <nm>" "Create branch"
+  _cheat_cmd "git checkout <nm>" "Switch branch"
+  _cheat_cmd "git checkout -b" "Create + switch"
+  _cheat_cmd "git branch -d" "Delete branch"
+  _cheat_cmd "gbr" "List branches by date"
+  _cheat_cmd "gclean" "Delete merged branches"
+  echo ""
+
+  _cheat_section "HISTORY & INFO"
+  _cheat_cmd "gl" "Pretty log (graph)"
+  _cheat_cmd "glast" "Last commit details"
+  _cheat_cmd "ghistory <file>" "File history"
+  _cheat_cmd "git show <hash>" "Show commit details"
+  _cheat_cmd "git blame <file>" "Line-by-line author"
+  echo ""
+
+  _cheat_section "UNDOING CHANGES"
+  _cheat_cmd "gundo" "Undo last commit"
+  _cheat_cmd "git reset HEAD" "Unstage file"
+  _cheat_cmd "git checkout --" "Discard changes"
+  _cheat_cmd "git clean -fd" "Remove untracked"
+  echo ""
+
+  _cheat_section "STASHING"
+  _cheat_cmd "git stash" "Stash changes"
+  _cheat_cmd "git stash pop" "Apply + remove stash"
+  _cheat_cmd "git stash list" "List all stashes"
+  echo ""
+
+  _cheat_section "REMOTE"
+  _cheat_cmd "git remote -v" "List remotes"
+  _cheat_cmd "git fetch" "Fetch changes"
+  _cheat_cmd "git pull" "Fetch + merge"
+  _cheat_cmd "gpr" "Pull with rebase"
+  _cheat_cmd "git push" "Push to remote"
+  echo ""
+}
+
+_cheatsheet_nav() {
+  _cheat_header "NAVIGATION CHEAT SHEET"
+
+  _cheat_section "DIRECTORY JUMPING"
+  _cheat_cmd "cd <dir>" "Change directory"
+  _cheat_cmd ".." "Go up one level"
+  _cheat_cmd "..2, ..3, ..4" "Go up multiple levels"
+  _cheat_cmd "cd -" "Go to previous directory"
+  _cheat_cmd "z <partial>" "Jump to frecent directory"
+  _cheat_cmd "groot" "Go to git root"
+  echo ""
+
+  _cheat_section "QUICK DIRECTORIES"
+  _cheat_cmd "dev" "→ ~/dev"
+  _cheat_cmd "dots" "→ ~/dotfiles"
+  _cheat_cmd "dl" "→ ~/Downloads"
+  _cheat_cmd "docs" "→ ~/Documents"
+  echo ""
+
+  _cheat_section "PROJECT BOOKMARKS"
+  _cheat_cmd "padd" "Bookmark current directory"
+  _cheat_cmd "padd myname" "Bookmark with custom name"
+  _cheat_cmd "p" "Fuzzy jump to project"
+  _cheat_cmd "plist" "List all bookmarks"
+  _cheat_cmd "prem" "Remove bookmark"
+  echo ""
+
+  _cheat_section "CREATING DIRECTORIES"
+  _cheat_cmd "mkcd foo/bar" "Create nested dirs + cd"
+  _cheat_cmd "mcd newdir" "mkdir + cd"
+  echo ""
+
+  _cheat_section "LISTING"
+  _cheat_cmd "ls" "List files (with icons)"
+  _cheat_cmd "ll" "Long format + git status"
+  _cheat_cmd "la" "Show hidden files"
+  _cheat_cmd "lt" "Tree view"
+  _cheat_cmd "cdl <dir>" "cd + ls combined"
+  echo ""
+}
+
+_cheatsheet_fzf() {
+  _cheat_header "FZF USAGE GUIDE"
+
+  _cheat_section "FZF KEYBINDINGS"
+  _cheat_cmd "Ctrl + t" "Find files/directories"
+  _cheat_cmd "Ctrl + r" "Search command history"
+  _cheat_cmd "Alt + c" "cd to directory (fuzzy)"
+  _cheat_cmd "Ctrl + f" "Tmux session switcher"
+  echo ""
+
+  _cheat_section "INSIDE FZF WINDOW"
+  _cheat_cmd "Type" "Fuzzy search"
+  _cheat_cmd "↑/↓ or Ctrl+j/k" "Navigate results"
+  _cheat_cmd "Enter" "Select"
+  _cheat_cmd "Esc" "Cancel"
+  _cheat_cmd "Tab" "Multi-select (mark)"
+  _cheat_cmd "Shift+Tab" "Unmark"
+  _cheat_cmd "Ctrl+a" "Select all"
+  _cheat_cmd "Ctrl+d" "Deselect all"
+  echo ""
+
+  _cheat_section "SMART FILE SELECTOR (Ctrl+t)"
+  echo -e "  ${_CHEAT_MAGENTA}After selecting:${_CHEAT_RESET}"
+  _cheat_cmd "Ctrl+o" "Open with default app"
+  _cheat_cmd "Ctrl+e" "Edit in nvim"
+  _cheat_cmd "Enter" "Show action menu"
+  echo ""
+  echo -e "  ${_CHEAT_MAGENTA}File Actions:${_CHEAT_RESET} Edit, Open, Show, Copy path/content, Delete"
+  echo -e "  ${_CHEAT_MAGENTA}Dir Actions:${_CHEAT_RESET} cd, Open manager, Tree, Copy path, Tmux pane"
+  echo ""
+
+  _cheat_section "PREVIEW WINDOW"
+  _cheat_cmd "Scroll" "Mouse wheel or Shift+↑/↓"
+  _cheat_cmd "Page up/down" "Ctrl+u / Ctrl+d"
+  echo ""
+
+  _cheat_section "CUSTOM FUNCTIONS USING FZF"
+  _cheat_cmd "p" "Project switcher"
+  _cheat_cmd "fe <name>" "Find + edit file"
+  _cheat_cmd "killp <name>" "Find + kill process"
+  _cheat_cmd "prem" "Remove bookmark (fuzzy)"
+  echo ""
+}
+
+# ============================================================================
+# Interactive Cheat Sheet Viewer
+# ============================================================================
+
+cheat() {
+  local topic="${1:-menu}"
+
+  case "$topic" in
+    menu)
+      _cheat_interactive_menu
+      ;;
+    keys|keyboard|shortcuts)
+      _cheatsheet_keyboard | less -R
+      ;;
+    commands|cmd)
+      _cheatsheet_commands | less -R
+      ;;
+    git)
+      _cheatsheet_git | less -R
+      ;;
+    nav|navigation|cd)
+      _cheatsheet_nav | less -R
+      ;;
+    fzf|fuzzy)
+      _cheatsheet_fzf | less -R
+      ;;
+    search)
+      _cheat_search "$2"
+      ;;
+    *)
+      echo "Usage: cheat [topic]"
+      echo ""
+      echo "Topics:"
+      echo "  menu        Interactive menu (default)"
+      echo "  keys        Keyboard shortcuts"
+      echo "  commands    All commands"
+      echo "  git         Git cheat sheet"
+      echo "  nav         Navigation"
+      echo "  fzf         FZF usage guide"
+      echo "  search      Search all cheat sheets"
+      ;;
+  esac
+}
+
+_cheat_interactive_menu() {
+  if [[ $_HAS_FZF -ne 1 ]]; then
+    echo "FZF not installed. Showing keyboard shortcuts:"
+    _cheatsheet_keyboard | less -R
+    return
+  fi
+
+  local choice=$(cat << 'EOF' | fzf --height 40% --reverse --prompt="Cheat Sheet: " --header="Choose a topic"
+🎹 Keyboard Shortcuts
+📜 All Commands
+🌳 Git Commands
+🧭 Navigation
+🔍 FZF Usage Guide
+🔎 Search All Sheets
+EOF
+)
+
+  case "$choice" in
+    *Keyboard*)
+      _cheatsheet_keyboard | less -R
+      ;;
+    *All\ Commands*)
+      _cheatsheet_commands | less -R
+      ;;
+    *Git*)
+      _cheatsheet_git | less -R
+      ;;
+    *Navigation*)
+      _cheatsheet_nav | less -R
+      ;;
+    *FZF*)
+      _cheatsheet_fzf | less -R
+      ;;
+    *Search*)
+      _cheat_search
+      ;;
+  esac
+}
+
+_cheat_search() {
+  local query="$1"
+
+  if [[ $_HAS_FZF -ne 1 ]]; then
+    echo "FZF not installed for search. Use: cheat <topic>"
+    return 1
+  fi
+
+  # Combine all cheat sheets
+  local all_sheets=$(
+    echo "=== KEYBOARD SHORTCUTS ===" && _cheatsheet_keyboard
+    echo ""
+    echo "=== ALL COMMANDS ===" && _cheatsheet_commands
+    echo ""
+    echo "=== GIT ===" && _cheatsheet_git
+    echo ""
+    echo "=== NAVIGATION ===" && _cheatsheet_nav
+    echo ""
+    echo "=== FZF ===" && _cheatsheet_fzf
+  )
+
+  if [[ -n "$query" ]]; then
+    echo "$all_sheets" | grep -i "$query" | less -R
+  else
+    echo "$all_sheets" | fzf --preview-window=up:70% | less -R
+  fi
+}
+
+# Quick access alias
+alias help='cheat'
+alias shortcuts='cheat keys'
+
+# Bind F1 to show cheat sheet
+bindkey -s '^[OP' 'cheat\n'  # F1

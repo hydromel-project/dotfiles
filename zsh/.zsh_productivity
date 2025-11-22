@@ -1,0 +1,411 @@
+# ============================================================================
+# Shell Productivity Enhancements
+# Quick wins for common pain points
+# ============================================================================
+
+# ============================================================================
+# Smart Directory Navigation
+# ============================================================================
+
+# Quick jump to common directories
+alias dev="cd ~/dev"
+alias dots="cd ~/dotfiles"
+alias dl="cd ~/Downloads"
+alias docs="cd ~/Documents"
+
+# Go up multiple directories quickly
+alias ..2="cd ../.."
+alias ..3="cd ../../.."
+alias ..4="cd ../../../.."
+alias ..5="cd ../../../../.."
+
+# List directory and cd in one command
+cdl() {
+  cd "$1" && ls
+}
+
+# Create directory and cd into it
+mkcd() {
+  mkdir -p "$1" && cd "$1"
+}
+
+# Go to git root
+alias groot='cd $(git rev-parse --show-toplevel 2>/dev/null || echo ".")'
+
+# ============================================================================
+# Powerful Search Functions
+# ============================================================================
+
+# Search for text in files (ripgrep with context)
+search() {
+  if [[ -z "$1" ]]; then
+    echo "Usage: search <pattern> [path]"
+    return 1
+  fi
+
+  local pattern="$1"
+  local path="${2:-.}"
+
+  if _has_command rg; then
+    rg -C 3 --color=always "$pattern" "$path" | less -R
+  else
+    grep -r -n -C 3 "$pattern" "$path" | less
+  fi
+}
+
+# Find files by name (case-insensitive)
+ff() {
+  if [[ -z "$1" ]]; then
+    echo "Usage: ff <filename-pattern>"
+    return 1
+  fi
+
+  if _has_command fd; then
+    fd -i "$1"
+  else
+    find . -iname "*$1*" 2>/dev/null
+  fi
+}
+
+# Find directories by name
+fd_dir() {
+  if [[ -z "$1" ]]; then
+    echo "Usage: fd_dir <dirname-pattern>"
+    return 1
+  fi
+
+  if _has_command fd; then
+    fd -t d -i "$1"
+  else
+    find . -type d -iname "*$1*" 2>/dev/null
+  fi
+}
+
+# Search command history (better than Ctrl-R alone)
+hist() {
+  if [[ -z "$1" ]]; then
+    history | tail -50
+  else
+    history | grep -i "$1"
+  fi
+}
+
+# Find and edit file in one command
+fe() {
+  local file=$(ff "$1" | fzf --preview 'bat --color=always {}' --preview-window='right:60%')
+  [[ -n "$file" ]] && ${EDITOR:-nvim} "$file"
+}
+
+# ============================================================================
+# Git Workflow Shortcuts
+# ============================================================================
+
+# Quick status check
+alias gst='git status -sb'
+
+# Add all and commit with message
+gac() {
+  git add -A && git commit -m "$*"
+}
+
+# Add all, commit, and push
+gacp() {
+  git add -A && git commit -m "$*" && git push
+}
+
+# Quick commit ammend
+alias gca='git commit --amend --no-edit'
+
+# Show what changed in last commit
+alias glast='git log -1 HEAD --stat'
+
+# Undo last commit (keep changes)
+alias gundo='git reset HEAD~1'
+
+# Clean up local branches that are merged
+alias gclean='git branch --merged | grep -v "\*\|main\|master\|develop" | xargs -n 1 git branch -d'
+
+# Show branches sorted by last commit
+alias gbr='git branch --sort=-committerdate'
+
+# Quick pull and rebase
+alias gpr='git pull --rebase'
+
+# Show file history
+ghistory() {
+  git log --follow -p -- "$1"
+}
+
+# ============================================================================
+# Project Context Switching
+# ============================================================================
+
+# Store project bookmarks
+readonly PROJECTS_FILE="$HOME/.project_bookmarks"
+
+# Add current directory as a project bookmark
+padd() {
+  local name="${1:-$(basename "$PWD")}"
+  local path="$PWD"
+
+  mkdir -p "$(dirname "$PROJECTS_FILE")"
+  echo "$name|$path" >> "$PROJECTS_FILE"
+  echo "✓ Added project: $name → $path"
+}
+
+# Jump to bookmarked project
+p() {
+  [[ ! -f "$PROJECTS_FILE" ]] && echo "No projects bookmarked. Use 'padd' to add one." && return 1
+
+  local selected=$(cat "$PROJECTS_FILE" | \
+    awk -F'|' '{printf "%-20s → %s\n", $1, $2}' | \
+    fzf --height 40% --reverse --prompt="Project: " | \
+    awk '{print $NF}')
+
+  [[ -n "$selected" ]] && cd "$selected" && echo "📁 $(basename "$selected")" && ls
+}
+
+# List all bookmarked projects
+plist() {
+  [[ ! -f "$PROJECTS_FILE" ]] && echo "No projects bookmarked." && return
+
+  echo "Bookmarked Projects:"
+  cat "$PROJECTS_FILE" | awk -F'|' '{printf "  %-20s → %s\n", $1, $2}'
+}
+
+# Remove project bookmark
+prem() {
+  [[ ! -f "$PROJECTS_FILE" ]] && echo "No projects bookmarked." && return 1
+
+  local selected=$(cat "$PROJECTS_FILE" | \
+    awk -F'|' '{print $1}' | \
+    fzf --height 40% --reverse --prompt="Remove: ")
+
+  [[ -n "$selected" ]] && \
+    grep -v "^$selected|" "$PROJECTS_FILE" > "${PROJECTS_FILE}.tmp" && \
+    mv "${PROJECTS_FILE}.tmp" "$PROJECTS_FILE" && \
+    echo "✓ Removed project: $selected"
+}
+
+# ============================================================================
+# Common Development Tasks
+# ============================================================================
+
+# Quick web server (Python)
+serve() {
+  local port="${1:-8000}"
+  echo "Starting server at http://localhost:$port"
+  python3 -m http.server "$port"
+}
+
+# Extract any archive
+extract() {
+  if [[ -z "$1" ]]; then
+    echo "Usage: extract <file>"
+    return 1
+  fi
+
+  if [[ ! -f "$1" ]]; then
+    echo "Error: File not found"
+    return 1
+  fi
+
+  case "$1" in
+    *.tar.bz2)   tar xjf "$1"     ;;
+    *.tar.gz)    tar xzf "$1"     ;;
+    *.bz2)       bunzip2 "$1"     ;;
+    *.rar)       unrar x "$1"     ;;
+    *.gz)        gunzip "$1"      ;;
+    *.tar)       tar xf "$1"      ;;
+    *.tbz2)      tar xjf "$1"     ;;
+    *.tgz)       tar xzf "$1"     ;;
+    *.zip)       unzip "$1"       ;;
+    *.Z)         uncompress "$1"  ;;
+    *.7z)        7z x "$1"        ;;
+    *)           echo "Error: Unknown archive format" ;;
+  esac
+}
+
+# Quick backup of a file
+backup() {
+  cp "$1" "$1.backup-$(date +%Y%m%d-%H%M%S)"
+}
+
+# Disk usage of current directory, sorted
+duh() {
+  if _has_command dust; then
+    dust -d 1
+  else
+    du -sh * | sort -h
+  fi
+}
+
+# Process search
+psgrep() {
+  if _has_command procs; then
+    procs "$1"
+  else
+    ps aux | grep -v grep | grep -i "$1"
+  fi
+}
+
+# Kill process by name
+killp() {
+  local pid=$(psgrep "$1" | awk '{print $2}' | fzf --header="Kill process:")
+  [[ -n "$pid" ]] && kill -9 "$pid" && echo "Killed process $pid"
+}
+
+# ============================================================================
+# Quick File Operations
+# ============================================================================
+
+# Copy with progress bar (if pv is available)
+cpv() {
+  if _has_command pv; then
+    pv "$1" > "$2"
+  else
+    cp "$1" "$2"
+  fi
+}
+
+# Copy current path to clipboard
+pwdc() {
+  pwd | tr -d '\n' | xclip -selection clipboard 2>/dev/null || pwd | tr -d '\n' | pbcopy 2>/dev/null
+  echo "Copied: $(pwd)"
+}
+
+# Quick edit common files
+alias zshrc='${EDITOR:-nvim} ~/.zshrc'
+alias zshprod='${EDITOR:-nvim} ~/.zsh_productivity'
+alias vimrc='${EDITOR:-nvim} ~/.config/nvim/init.vim'
+alias tmuxconf='${EDITOR:-nvim} ~/.tmux.conf'
+alias gitconf='${EDITOR:-nvim} ~/.gitconfig'
+
+# ============================================================================
+# Network & System Shortcuts
+# ============================================================================
+
+# Get public IP
+alias myip='curl -s ifconfig.me'
+
+# Get local IP
+alias localip='ip -4 addr show | grep -oP "(?<=inet\s)\d+(\.\d+){3}" | grep -v "127.0.0.1"'
+
+# List all open ports
+alias ports='netstat -tulanp 2>/dev/null || ss -tulanp'
+
+# ============================================================================
+# Clipboard Helpers
+# ============================================================================
+
+# Copy file content to clipboard
+cpy() {
+  cat "$1" | xclip -selection clipboard 2>/dev/null || cat "$1" | pbcopy 2>/dev/null
+  echo "Copied contents of: $1"
+}
+
+# ============================================================================
+# Time Savers
+# ============================================================================
+
+# Repeat last command with sudo
+alias please='sudo $(fc -ln -1)'
+
+# Quick reload shell
+alias reload='exec zsh'
+
+# Clear screen properly
+alias cls='clear && printf "\e[3J"'
+
+# Show PATH in readable format
+alias path='echo $PATH | tr ":" "\n"'
+
+# Quick system update
+alias update='sudo apt update && sudo apt upgrade -y'
+
+# ============================================================================
+# Smart Aliases (Context-aware)
+# ============================================================================
+
+# mkdir and cd
+mcd() {
+  mkdir -p "$@" && cd "$_"
+}
+
+# ============================================================================
+# Workflow Templates
+# ============================================================================
+
+# Start a new project
+newproject() {
+  local name="$1"
+  [[ -z "$name" ]] && echo "Usage: newproject <name>" && return 1
+
+  mkdir -p "$name"
+  cd "$name"
+  git init
+  echo "# $name" > README.md
+  echo "node_modules/" > .gitignore
+  echo ".env" >> .gitignore
+
+  echo "✓ Created new project: $name"
+  ls -la
+}
+
+# ============================================================================
+# Help Command
+# ============================================================================
+
+productivity-help() {
+  cat << 'EOF'
+🚀 Productivity Commands Cheat Sheet
+
+📁 NAVIGATION:
+  ..2, ..3, ..4        Go up 2/3/4 directories
+  mkcd <dir>           Create directory and cd into it
+  groot                Go to git repository root
+
+🔍 SEARCH:
+  search <text>        Search for text in files (with context)
+  ff <name>            Find files by name (case-insensitive)
+  fe <name>            Find and edit file
+  hist <term>          Search command history
+
+📊 PROJECT SWITCHING:
+  padd [name]          Bookmark current directory
+  p                    Jump to bookmarked project (fuzzy)
+  plist                List all projects
+  prem                 Remove project bookmark
+
+⚡ GIT SHORTCUTS:
+  gac "msg"            Add all & commit
+  gacp "msg"           Add all, commit & push
+  gca                  Amend last commit (no edit)
+  gundo                Undo last commit (keep changes)
+  gclean               Delete merged branches
+  gbr                  Show branches by date
+
+🛠️  UTILITIES:
+  extract <file>       Extract any archive
+  backup <file>        Quick backup with timestamp
+  duh                  Disk usage, sorted
+  serve [port]         Start web server (default: 8000)
+  psgrep <name>        Find process by name
+  killp <name>         Kill process (with fzf)
+
+📋 CLIPBOARD:
+  pwdc                 Copy current path
+  cpy <file>           Copy file contents
+
+⚙️  QUICK EDITS:
+  zshrc                Edit .zshrc
+  zshprod              Edit productivity config
+  tmuxconf             Edit tmux config
+  gitconf              Edit git config
+
+Type any command for help!
+EOF
+}
+
+# Alias for convenience
+alias ph='productivity-help'

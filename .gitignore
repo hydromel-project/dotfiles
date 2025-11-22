@@ -1,0 +1,47 @@
+# Backup files
+*.backup
+*.bak
+*~
+*.backup-*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Vim swap files
+*.swp
+*.swo
+
+# Machine-specific files
+local/
+.local/
+
+# Sensitive data - DO NOT COMMIT
+**/*secret*
+**/*private*
+**/*token*
+**/*password*
+**/*credential*
+**/.env*
+**/.npmrc
+**/.pypirc
+**/id_rsa*
+**/id_ed25519*
+**/.ssh/
+
+# History and cache files (may contain sensitive commands)
+.zsh_history
+.bash_history
+.lesshst
+.python_history
+.node_repl_history
+
+# Project bookmarks (personal paths)
+.projects
+zsh/.projects
+
+# Logs
+*.log
+
+# Git credentials
+.git-credentials
