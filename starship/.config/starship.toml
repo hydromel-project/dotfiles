@@ -1,56 +1,177 @@
-# Starship Prompt Configuration
-# A minimal, blazing-fast, and infinitely customizable prompt
-# https://starship.rs/config/
+# ============================================================================
+# Starship Prompt Configuration - Optimized & Enhanced
+# ============================================================================
+# Docs: https://starship.rs/config/
+# Presets: https://starship.rs/presets/
 
-# Get editor completions based on the config schema
 "$schema" = 'https://starship.rs/config-schema.json'
 
-# Inserts a blank line between shell prompts
+# ============================================================================
+# Global Settings
+# ============================================================================
+
+# Add blank line between prompts for better readability
 add_newline = true
 
-# Timeout for starship to scan files (milliseconds)
-scan_timeout = 30
+# Performance settings (optimized for speed)
+scan_timeout = 10        # Reduced from 30ms for faster rendering
 command_timeout = 500
 
-# Format of the prompt
-format = """
-[╭─](bold green)$username$hostname$directory$git_branch$git_status$git_state$git_metrics$rust$python$nodejs$golang$docker_context$kubernetes$aws$gcloud$azure
-[╰─](bold green)$character"""
+# ============================================================================
+# Prompt Format
+# ============================================================================
 
-# Right prompt (on the same line as input)
-right_format = """$cmd_duration$time"""
+# Main prompt (left side)
+format = """
+[┏](bold green)\
+$os\
+$username\
+$hostname\
+$localip\
+$shlvl\
+$directory\
+$git_branch\
+$git_commit\
+$git_state\
+$git_metrics\
+$git_status\
+$docker_context\
+$package\
+$c\
+$cmake\
+$golang\
+$helm\
+$java\
+$kotlin\
+$gradle\
+$nodejs\
+$php\
+$python\
+$ruby\
+$rust\
+$terraform\
+$nix_shell\
+$conda\
+$memory_usage\
+$aws\
+$gcloud\
+$kubernetes\
+$fill\
+$cmd_duration\
+$jobs\
+$battery\
+$time\
+$status\
+$container\
+$shell\
+$line_break\
+[┗](bold green)$character"""
+
+# Right-side prompt (disabled for cleaner look)
+right_format = ""
+
+# Continuation prompt
+continuation_prompt = "[▶▶](bold green) "
 
 # ============================================================================
-# Prompt Character
+# Line Break
+# ============================================================================
+[line_break]
+disabled = false
+
+# ============================================================================
+# Fill - Push right-aligned content
+# ============================================================================
+[fill]
+symbol = " "
+
+# ============================================================================
+# OS Icon
+# ============================================================================
+[os]
+disabled = false
+style = "bold white"
+
+[os.symbols]
+Alpine = " "
+Amazon = " "
+Android = " "
+Arch = " "
+CentOS = " "
+Debian = " "
+Fedora = " "
+Linux = " "
+Macos = " "
+Manjaro = " "
+Mint = " "
+NixOS = " "
+openSUSE = " "
+Raspbian = " "
+Redhat = " "
+RedHatEnterprise = " "
+Ubuntu = " "
+Unknown = " "
+Windows = " "
+
+# ============================================================================
+# Character (Prompt Symbol)
 # ============================================================================
 [character]
-success_symbol = "[➜](bold green)"
-error_symbol = "[✗](bold red)"
-vimcmd_symbol = "[⌘](bold yellow)"
-vimcmd_visual_symbol = "[V](bold cyan)"
-vimcmd_replace_symbol = "[R](bold purple)"
-vimcmd_replace_one_symbol = "[R](bold purple)"
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
+vimcmd_symbol = "[❮](bold green)"
+vimcmd_visual_symbol = "[❮](bold yellow)"
+vimcmd_replace_symbol = "[❮](bold purple)"
+vimcmd_replace_one_symbol = "[❮](bold purple)"
+
+# ============================================================================
+# Username
+# ============================================================================
+[username]
+style_user = "bold yellow"
+style_root = "bold red"
+format = "[ $user]($style)"
+disabled = false
+show_always = false  # Only show in SSH or if root
+
+# ============================================================================
+# Hostname
+# ============================================================================
+[hostname]
+ssh_only = true
+ssh_symbol = " "
+trim_at = "."
+format = "[@$hostname]($style) "
+style = "bold dimmed green"
+disabled = false
 
 # ============================================================================
 # Directory
 # ============================================================================
 [directory]
 style = "bold cyan"
-truncation_length = 3
+truncation_length = 4
 truncate_to_repo = true
 truncation_symbol = "…/"
-home_symbol = "~"
-read_only = " 🔒"
-read_only_style = "red"
+home_symbol = " ~"
+read_only = " 󰌾"
+read_only_style = "bold red"
+format = "[ $path]($style)[$read_only]($read_only_style) "
 
-# Custom directory replacements
+# Advanced path substitution
 [directory.substitutions]
-"Documents" = "📄 "
-"Downloads" = "📥 "
-"Music" = "🎵 "
-"Pictures" = "📷 "
-"Projects" = "💻 "
-"dotfiles" = "⚙️  "
+"Documents" = "󰈙 "
+"Downloads" = " "
+"Music" = "󰝚 "
+"Pictures" = " "
+"Videos" = " "
+"Projects" = "󰲋 "
+"dotfiles" = " "
+".config" = " "
+"Desktop" = "󰚝 "
+"Development" = " "
+"dev" = " "
+"work" = "󰄄 "
 
 # ============================================================================
 # Git Branch
@@ -58,10 +179,23 @@ read_only_style = "red"
 [git_branch]
 symbol = " "
 style = "bold purple"
-truncation_length = 20
+truncation_length = 25
 truncation_symbol = "…"
 only_attached = false
 always_show_remote = false
+format = "on [$symbol$branch(:$remote_branch)]($style) "
+
+# ============================================================================
+# Git Commit
+# ============================================================================
+[git_commit]
+commit_hash_length = 7
+format = "[\\($hash$tag\\)]($style) "
+style = "bold green"
+only_detached = true
+disabled = false
+tag_symbol = " 🏷  "
+tag_disabled = false
 
 # ============================================================================
 # Git Status
@@ -69,19 +203,21 @@ always_show_remote = false
 [git_status]
 style = "bold red"
 disabled = false
+format = '([$all_status$ahead_behind]($style) )'
 conflicted = "⚔️ "
-ahead = "⇡${count}"
-behind = "⇣${count}"
-diverged = "⇕⇡${ahead_count}⇣${behind_count}"
-untracked = "?${count}"
-stashed = "📦${count}"
-modified = "!${count}"
-staged = "+${count}"
-renamed = "»${count}"
-deleted = "✘${count}"
+ahead = "⇡${count} "
+behind = "⇣${count} "
+diverged = "⇕⇡${ahead_count}⇣${behind_count} "
+untracked = "?${count} "
+stashed = "📦${count} "
+modified = "!${count} "
+staged = "+${count} "
+renamed = "»${count} "
+deleted = "✘${count} "
+typechanged = ""
 
 # ============================================================================
-# Git Metrics
+# Git Metrics (lines added/removed)
 # ============================================================================
 [git_metrics]
 disabled = false
@@ -89,13 +225,14 @@ added_style = "bold green"
 deleted_style = "bold red"
 only_nonzero_diffs = true
 format = '([+$added]($added_style) )([-$deleted]($deleted_style) )'
+ignore_submodules = false
 
 # ============================================================================
-# Git State
+# Git State (rebase, merge, etc)
 # ============================================================================
 [git_state]
-format = '[\($state( $progress_current of $progress_total)\)]($style) '
-style = "bright-black"
+format = '[\[$state($progress_current/$progress_total)\]]($style) '
+style = "bold yellow"
 rebase = "REBASING"
 merge = "MERGING"
 revert = "REVERTING"
@@ -105,43 +242,137 @@ am = "AM"
 am_or_rebase = "AM/REBASE"
 
 # ============================================================================
-# Username
+# Package Version
 # ============================================================================
-[username]
-style_user = "bold yellow"
-style_root = "bold red"
-format = "[$user]($style) "
+[package]
+symbol = "󰏗 "
+style = "bold 208"
+format = "is [$symbol$version]($style) "
+display_private = false
 disabled = false
-show_always = false
 
 # ============================================================================
-# Hostname
+# Command Duration
 # ============================================================================
-[hostname]
-ssh_only = true
-ssh_symbol = "🌐 "
-style = "bold green"
-format = "on [$hostname]($style) "
-disabled = false
+[cmd_duration]
+min_time = 1_000          # Show for commands > 1s
+style = "bold yellow"
+format = "took [$duration]($style) "
+show_milliseconds = false
+show_notifications = false
+min_time_to_notify = 45_000
 
 # ============================================================================
 # Time
 # ============================================================================
 [time]
 disabled = false
-time_format = "%T"
+time_format = "%R"       # 24h format (HH:MM)
 style = "bold dimmed white"
-format = '[$time]($style) '
+format = "[$time]($style) "
+use_12hr = false
 
 # ============================================================================
-# Command Duration
+# Status (exit code)
 # ============================================================================
-[cmd_duration]
-min_time = 2_000
+[status]
+style = "bold red"
+symbol = "✖"
+success_symbol = ""
+not_executable_symbol = "🚫 "
+not_found_symbol = "🔍 "
+sigint_symbol = "🧱 "
+signal_symbol = "⚡ "
+format = '[\[$symbol$status\]]($style) '
+map_symbol = true
+disabled = false
+pipestatus = true
+pipestatus_separator = "|"
+pipestatus_format = '\[$pipestatus\] => [$symbol$common_meaning$signal_name$maybe_int]($style) '
+
+# ============================================================================
+# Jobs (background processes)
+# ============================================================================
+[jobs]
+symbol = " "
+style = "bold blue"
+number_threshold = 1
+symbol_threshold = 1
+format = "[$symbol$number]($style) "
+
+# ============================================================================
+# Battery
+# ============================================================================
+[battery]
+full_symbol = "󰁹 "
+charging_symbol = "󰂄 "
+discharging_symbol = "󰂃 "
+unknown_symbol = "󰁽 "
+empty_symbol = "󰂎 "
+disabled = false  # Enable on laptops
+format = "[$symbol$percentage]($style) "
+
+[[battery.display]]
+threshold = 10
+style = "bold red"
+discharging_symbol = "󰂎 "
+
+[[battery.display]]
+threshold = 30
 style = "bold yellow"
-format = "took [$duration]($style) "
-show_milliseconds = false
-show_notifications = false
+discharging_symbol = "󰁺 "
+
+[[battery.display]]
+threshold = 50
+style = "bold dimmed yellow"
+discharging_symbol = "󰁾 "
+
+[[battery.display]]
+threshold = 100
+style = "bold green"
+discharging_symbol = "󰁹 "
+
+# ============================================================================
+# Memory Usage
+# ============================================================================
+[memory_usage]
+disabled = true   # Enable if you want to see RAM usage
+threshold = 75
+symbol = "󰍛 "
+style = "bold dimmed white"
+format = "via $symbol[$ram( | $swap)]($style) "
+
+# ============================================================================
+# Shell Level (nested shells)
+# ============================================================================
+[shlvl]
+disabled = false
+threshold = 2
+symbol = "󰘦 "
+repeat = true
+style = "bold yellow"
+format = "[$symbol$shlvl]($style) "
+
+# ============================================================================
+# Container (Docker/Podman)
+# ============================================================================
+[container]
+symbol = "⬢ "
+style = "bold red dimmed"
+format = '[$symbol \[$name\]]($style) '
+disabled = false
+
+# ============================================================================
+# Shell
+# ============================================================================
+[shell]
+disabled = true  # Usually not needed
+bash_indicator = "bash"
+fish_indicator = "fish"
+zsh_indicator = "zsh"
+powershell_indicator = "psh"
+format = "[$indicator]($style) "
+style = "cyan bold"
 
 # ============================================================================
 # Programming Languages
@@ -153,6 +384,8 @@ symbol = " "
 style = "bold red"
 format = "via [$symbol($version )]($style)"
 disabled = false
+detect_extensions = ["rs"]
+detect_files = ["Cargo.toml"]
 
 # Python
 [python]
@@ -163,7 +396,7 @@ pyenv_version_name = false
 pyenv_prefix = "pyenv "
 python_binary = ["python3", "python", "python2"]
 detect_extensions = ["py"]
-detect_files = [".python-version", "Pipfile", "__pycache__", "pyproject.toml", "requirements.txt", "setup.py", "tox.ini"]
+detect_files = [".python-version", "Pipfile", "pyproject.toml", "requirements.txt", "setup.py", "tox.ini", "pyrightconfig.json"]
 detect_folders = []
 disabled = false
 
@@ -172,6 +405,7 @@ disabled = false
 symbol = " "
 style = "bold green"
 format = "via [$symbol($version )]($style)"
+not_capable_style = "bold red"
 detect_extensions = ["js", "mjs", "cjs", "ts", "mts", "cts"]
 detect_files = ["package.json", ".node-version", ".nvmrc"]
 detect_folders = ["node_modules"]
@@ -192,6 +426,8 @@ disabled = false
 symbol = " "
 style = "bold red"
 format = "via [$symbol($version )]($style)"
+detect_extensions = ["java", "class", "jar", "gradle", "clj", "cljc"]
+detect_files = ["pom.xml", "build.gradle.kts", "build.sbt", ".java-version", "deps.edn", "project.clj", "build.boot", ".sdkmanrc"]
 disabled = false
 
 # PHP
@@ -199,6 +435,8 @@ disabled = false
 symbol = " "
 style = "bold blue"
 format = "via [$symbol($version )]($style)"
+detect_extensions = ["php"]
+detect_files = ["composer.json", ".php-version"]
 disabled = false
 
 # Ruby
@@ -206,15 +444,80 @@ disabled = false
 symbol = " "
 style = "bold red"
 format = "via [$symbol($version )]($style)"
+detect_extensions = ["rb"]
+detect_files = ["Gemfile", ".ruby-version"]
+detect_folders = []
 disabled = false
 
-# ============================================================================
-# Package Version
-# ============================================================================
-[package]
-symbol = "📦 "
-style = "bold 208"
-format = "is [$symbol$version]($style) "
+# C
+[c]
+symbol = " "
+style = "bold blue"
+format = "via [$symbol($version(-$name) )]($style)"
+detect_extensions = ["c", "h"]
+commands = [["cc", "--version"], ["gcc", "--version"], ["clang", "--version"]]
+disabled = false
+
+# CMake
+[cmake]
+symbol = "△ "
+style = "bold blue"
+format = "via [$symbol($version )]($style)"
+detect_extensions = []
+detect_files = ["CMakeLists.txt", "CMakeCache.txt"]
+disabled = false
+
+# Kotlin
+[kotlin]
+symbol = " "
+style = "bold blue"
+format = "via [$symbol($version )]($style)"
+kotlin_binary = "kotlin"
+detect_extensions = ["kt", "kts"]
+disabled = false
+
+# Gradle
+[gradle]
+symbol = " "
+style = "bold cyan"
+format = "via [$symbol($version )]($style)"
+detect_extensions = ["gradle", "gradle.kts"]
+disabled = false
+
+# Helm
+[helm]
+symbol = "⎈ "
+style = "bold white"
+format = "via [$symbol($version )]($style)"
+detect_extensions = []
+detect_files = ["helmfile.yaml", "Chart.yaml"]
+disabled = false
+
+# Terraform
+[terraform]
+symbol = "󱁢 "
+style = "bold purple"
+format = "via [$symbol$workspace ]($style)"
+detect_extensions = ["tf", "tfplan", "tfstate"]
+detect_files = []
+disabled = false
+
+# Nix Shell
+[nix_shell]
+symbol = " "
+style = "bold blue"
+format = 'via [$symbol$state( \($name\))]($style) '
+impure_msg = '[impure](bold red)'
+pure_msg = '[pure](bold green)'
+unknown_msg = '[unknown](bold yellow)'
+disabled = false
+
+# Conda
+[conda]
+symbol = " "
+style = "bold green"
+format = "via [$symbol$environment]($style) "
+ignore_base = true
 disabled = false
 
 # ============================================================================
@@ -238,8 +541,12 @@ symbol = "☸ "
 style = "bold blue"
 format = 'on [$symbol$context( \($namespace\))]($style) '
 disabled = true  # Enable if you use kubectl
+detect_extensions = ["yaml", "yml"]
 detect_files = ["k8s"]
-detect_folders = []
+
+[kubernetes.context_aliases]
+"dev.local.cluster.k8s" = "dev"
+"gke_.*_(?P<var_cluster>[\\w-]+)" = "gke-$var_cluster"
 
 # ============================================================================
 # Cloud Providers
@@ -247,116 +554,70 @@ detect_folders = []
 
 # AWS
 [aws]
-symbol = "☁️  "
+symbol = " "
 style = "bold yellow"
 format = 'on [$symbol($profile )(\($region\) )(\[$duration\] )]($style)'
 disabled = false
+force_display = false
+
+[aws.region_aliases]
+us-east-1 = "use1"
+us-east-2 = "use2"
+us-west-1 = "usw1"
+us-west-2 = "usw2"
+eu-west-1 = "euw1"
+eu-central-1 = "euc1"
+ap-southeast-1 = "apse1"
+ap-southeast-2 = "apse2"
 
 # Google Cloud
 [gcloud]
-symbol = "☁️  "
+symbol = "󱇶 "
 style = "bold blue"
 format = 'on [$symbol$account(@$domain)(\($region\))]($style) '
 disabled = false
 
+[gcloud.region_aliases]
+us-central1 = "uc1"
+us-east1 = "ue1"
+us-west1 = "uw1"
+europe-west1 = "ew1"
+asia-southeast1 = "as1"
+
 # Azure
 [azure]
-symbol = "ﴃ "
+symbol = "󰠅 "
 style = "bold blue"
 format = "on [$symbol($subscription)]($style) "
 disabled = false
 
 # ============================================================================
-# Environment Variables
+# Local IP
 # ============================================================================
-[env_var.SHELL]
-variable = "SHELL"
-default = "unknown shell"
-disabled = true
-
-# ============================================================================
-# Memory Usage
-# ============================================================================
-[memory_usage]
-disabled = true
-threshold = 75
-symbol = " "
-style = "bold dimmed white"
-format = "via $symbol[$ram( | $swap)]($style) "
-
-# ============================================================================
-# Battery
-# ============================================================================
-[battery]
-full_symbol = "🔋"
-charging_symbol = "⚡"
-discharging_symbol = "💀"
-unknown_symbol = "❓"
-empty_symbol = "🪫"
-disabled = true
-
-[[battery.display]]
-threshold = 10
-style = "bold red"
-
-[[battery.display]]
-threshold = 30
+[localip]
+ssh_only = true
+format = "[@$localipv4]($style) "
 style = "bold yellow"
-
-# ============================================================================
-# Jobs
-# ============================================================================
-[jobs]
-symbol = "✦ "
-style = "bold blue"
-number_threshold = 1
-symbol_threshold = 1
-format = "[$symbol$number]($style) "
-
-# ============================================================================
-# Status
-# ============================================================================
-[status]
-style = "bold red"
-symbol = "✖"
-success_symbol = ""
-not_executable_symbol = "🚫"
-not_found_symbol = "🔍"
-sigint_symbol = "🧱"
-signal_symbol = "⚡"
-format = '[\[$symbol$status( $common_meaning)( $signal_name)( $maybe_int)\]]($style) '
-map_symbol = true
-disabled = false
-pipestatus = true
-pipestatus_separator = "|"
-pipestatus_format = '\[$pipestatus\] => [$symbol$status]($style)'
-
-# ============================================================================
-# SHLVL (Shell Level)
-# ============================================================================
-[shlvl]
-disabled = true
-threshold = 2
-symbol = "↕️  "
-style = "bold yellow"
-format = "[$symbol$shlvl]($style) "
-
-# ============================================================================
-# Line Break
-# ============================================================================
-[line_break]
 disabled = false
 
 # ============================================================================
-# Custom Commands (Examples)
+# Custom Commands
 # ============================================================================
 
-# Show if in a Nix shell
-[custom.nix_shell]
-disabled = true
-description = "Show if in a Nix shell"
-command = "echo 'nix-shell'"
-when = "test -n \"$IN_NIX_SHELL\""
+# Show if in devcontainer
+[custom.devcontainer]
+command = "echo 'devcontainer'"
+when = 'test -f /.dockerenv'
+symbol = "📦 "
 style = "bold blue"
-symbol = "❄️ "
-format = "via [$symbol$output]($style) "
+format = "[$symbol$output]($style) "
+disabled = true
+
+# Show if using direnv
+[custom.direnv]
+command = "echo 'direnv'"
+when = 'test -n "$DIRENV_DIR"'
+symbol = "📁 "
+style = "bold yellow"
+format = "[$symbol]($style) "
+disabled = true
