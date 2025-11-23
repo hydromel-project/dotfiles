@@ -74,6 +74,7 @@ backup_existing_files() {
     # Check for files that would conflict
     local files_to_check=(
         "$HOME/.zshrc"
+        "$HOME/.config/starship.toml"
         "$HOME/.tmux.conf"
         "$HOME/.gitconfig"
     )
@@ -121,7 +122,7 @@ stow_package() {
 }
 
 install_dotfiles() {
-    local packages=(zsh nvim tmux git)
+    local packages=(zsh starship tmux git nvim)
 
     info "Installing dotfiles..."
 

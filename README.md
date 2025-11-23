@@ -17,15 +17,17 @@ This repository contains **sanitized** configuration files safe for public shari
 ```
 dotfiles/
 ├── zsh/              # Zsh configuration
-│   └── .zshrc
-├── nvim/             # Neovim configuration
-│   └── .config/nvim/
+│   ├── .zshrc
+│   ├── .zsh_productivity
+│   └── .zsh_cheatsheet
+├── starship/         # Starship prompt configuration
+│   └── .config/starship.toml
 ├── tmux/             # Tmux configuration
 │   └── .tmux.conf
 ├── git/              # Git configuration
 │   ├── .gitconfig
 │   └── .gitignore_global
-├── scripts/          # Utility scripts
+├── nvim/             # Neovim configuration (placeholder)
 └── install.sh        # Bootstrap script
 ```
 
@@ -50,10 +52,10 @@ sudo apt install stow
 
 # Stow individual packages
 cd ~/dotfiles
-stow zsh      # Creates ~/.zshrc symlink
-stow nvim     # Creates ~/.config/nvim/* symlinks
-stow tmux     # Creates ~/.tmux.conf symlink
-stow git      # Creates ~/.gitconfig symlink
+stow zsh       # Creates ~/.zshrc, ~/.zsh_productivity, ~/.zsh_cheatsheet
+stow starship  # Creates ~/.config/starship.toml
+stow tmux      # Creates ~/.tmux.conf
+stow git       # Creates ~/.gitconfig and ~/.gitignore_global
 ```
 
 ## What is GNU Stow?
