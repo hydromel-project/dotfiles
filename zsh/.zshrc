@@ -728,12 +728,35 @@ alias ....="cd ../../.."
 alias psg="ps aux | grep -v grep | grep -i -e VSZ -e"
 
 # ============================================================================
+# Custom FZF History Widget (populate without executing)
+# ============================================================================
+fzf-history-widget-accept() {
+  local selected
+  selected=$(fc -rl 1 | awk '{$1="";print substr($0,2)}' | \
+    fzf --height 40% --reverse --tiebreak=index --bind=ctrl-r:toggle-sort \
+    --query="${LBUFFER}" \
+    --prompt="History > ")
+
+  if [[ -n "$selected" ]]; then
+    LBUFFER="$selected"
+    zle redisplay
+  fi
+}
+zle -N fzf-history-widget-accept
+
+# ============================================================================
 # Keybindings
 # ============================================================================
-bindkey -s ^f "~/.local/scripts/tmux-sessionizer\n"
+# Custom widget for tmux-sessionizer (populate without executing)
+tmux-sessionizer-widget() {
+  LBUFFER="~/.local/scripts/tmux-sessionizer"
+  zle redisplay
+}
+zle -N tmux-sessionizer-widget
+bindkey '^f' tmux-sessionizer-widget
 
 # Additional useful bindings (if tools exist)
-bindkey '^r' fzf-history-widget      # Ctrl-r: fuzzy history search
+bindkey '^r' fzf-history-widget-accept      # Ctrl-r: fuzzy history search (populate without executing)
 
 # history-substring-search plugin bindings
 bindkey '^[[A' history-substring-search-up      # Up arrow
@@ -972,3 +995,14 @@ _check_missing_tools() {
 
 # Run check in background to avoid slowing shell startup
 _check_missing_tools &!
+
+. "$HOME/.atuin/bin/env"
+
+eval "$(atuin init zsh)"
+
+# bun completions
+[ -s "/home/barilc/.bun/_bun" ] && source "/home/barilc/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
