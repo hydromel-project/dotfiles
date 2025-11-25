@@ -1052,13 +1052,14 @@ _check_missing_tools &!
 # ============================================================================
 _has_command direnv && eval "$(direnv hook zsh)"
 
-. "$HOME/.atuin/bin/env"
-
-eval "$(atuin init zsh)"
-
 # bun completions
 [ -s "/home/barilc/.bun/_bun" ] && source "/home/barilc/.bun/_bun"
 
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+# ============================================================================
+# Ensure FZF history binding is set (override any defaults)
+# ============================================================================
+bindkey '^r' fzf-history-widget-accept
