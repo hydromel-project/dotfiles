@@ -7,6 +7,13 @@ readonly ZSHRC_FZF_MENU_HEIGHT="40%"
 readonly ZSHRC_BAT_THEME="TwoDark"
 
 # ============================================================================
+# Locale Configuration  
+# ============================================================================
+export LANG="C.UTF-8"
+export LC_ALL="C.UTF-8"
+export LANGUAGE="C.UTF-8"
+
+# ============================================================================
 # PATH Configuration
 # ============================================================================
 export PATH="$HOME/.fzf/bin:$HOME/.local/bin:$HOME/bin:/usr/local/bin:$PATH"
