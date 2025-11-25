@@ -43,6 +43,107 @@ command_exists() {
 # Installation Functions
 #================================================================================
 
+install_dependencies() {
+    local packages_to_install=()
+    
+    info "Checking core dependencies..."
+    
+    # Check for curl or wget
+    if ! command_exists curl && ! command_exists wget; then
+        packages_to_install+=("curl")
+    fi
+    
+    # Check for zsh
+    if ! command_exists zsh; then
+        packages_to_install+=("zsh")
+    fi
+    
+    if [[ ${#packages_to_install[@]} -eq 0 ]]; then
+        success "All core dependencies already installed"
+        return 0
+    fi
+    
+    info "Installing dependencies: ${packages_to_install[*]}"
+
+    if command_exists apt; then
+        sudo apt update && sudo apt install -y "${packages_to_install[@]}"
+    elif command_exists brew; then
+        brew install "${packages_to_install[@]}"
+    elif command_exists pacman; then
+        sudo pacman -S --noconfirm "${packages_to_install[@]}"
+    elif command_exists dnf; then
+        sudo dnf install -y "${packages_to_install[@]}"
+    elif command_exists yum; then
+        sudo yum install -y "${packages_to_install[@]}"
+    else
+        error "Could not detect package manager. Please install manually: ${packages_to_install[*]}"
+        exit 1
+    fi
+
+    success "Core dependencies installed"
+}
+
+install_zsh() {
+    if command_exists zsh; then
+        success "Zsh already installed"
+        return 0
+    fi
+
+    # This should be handled by install_dependencies now
+    error "Zsh should have been installed by install_dependencies. Something went wrong."
+    exit 1
+}
+
+install_ohmyzsh() {
+    if [[ -d "$HOME/.oh-my-zsh" ]]; then
+        success "Oh My Zsh already installed"
+        return 0
+    fi
+
+    info "Installing Oh My Zsh..."
+    
+    # Download and install Oh My Zsh
+    if command_exists curl; then
+        sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+    elif command_exists wget; then
+        sh -c "$(wget -O- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+    else
+        error "curl or wget is required to install Oh My Zsh"
+        exit 1
+    fi
+
+    success "Oh My Zsh installed"
+}
+
+change_default_shell() {
+    local current_shell="$SHELL"
+    local zsh_path
+    
+    # Get zsh path
+    zsh_path=$(which zsh)
+    
+    if [[ "$current_shell" == "$zsh_path" ]]; then
+        success "Zsh is already the default shell"
+        return 0
+    fi
+
+    info "Changing default shell to Zsh..."
+    
+    # Add zsh to /etc/shells if not already there
+    if ! grep -q "$zsh_path" /etc/shells; then
+        echo "$zsh_path" | sudo tee -a /etc/shells > /dev/null
+    fi
+    
+    # Change default shell
+    if command_exists chsh; then
+        sudo chsh -s "$zsh_path" "$USER"
+        success "Default shell changed to Zsh"
+        warning "You'll need to restart your terminal or run 'exec zsh' to use the new shell"
+    else
+        warning "chsh not available. Please manually set Zsh as your default shell"
+    fi
+}
+
 install_stow() {
     if command_exists stow; then
         success "GNU Stow already installed"
@@ -57,6 +158,10 @@ install_stow() {
         brew install stow
     elif command_exists pacman; then
         sudo pacman -S stow
+    elif command_exists dnf; then
+        sudo dnf install -y stow
+    elif command_exists yum; then
+        sudo yum install -y stow
     else
         error "Could not detect package manager. Please install GNU Stow manually."
         exit 1
@@ -297,12 +402,19 @@ show_next_steps() {
     echo -e "${GREEN}  Dotfiles installed successfully!${NC}"
     echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
+    echo "What was installed:"
+    echo -e "  ✓ Zsh shell with Oh My Zsh framework"
+    echo -e "  ✓ Neovim 0.12 with comprehensive configuration"
+    echo -e "  ✓ Starship prompt with local IP and machine name"
+    echo -e "  ✓ GNU Stow for dotfiles management"
+    echo -e "  ✓ All configuration files properly linked"
+    echo ""
     echo "Next steps:"
     echo ""
-    echo "  1. Reload your shell:"
+    echo "  1. Start using Zsh (if not already active):"
     echo -e "     ${BLUE}exec zsh${NC}"
     echo ""
-    echo "  2. Install recommended tools:"
+    echo "  2. Install recommended development tools:"
     echo -e "     ${BLUE}install-tools${NC}"
     echo -e "     ${BLUE}install-bonus-tools${NC}"
     echo ""
@@ -312,12 +424,10 @@ show_next_steps() {
     echo "  4. Install Neovim stable version (optional):"
     echo -e "     ${BLUE}NVIM_STABLE=true ./install.sh${NC}"
     echo ""
-    echo "  5. Initialize git repository (if not already done):"
-    echo -e "     ${BLUE}cd ~/dotfiles && git init && git add . && git commit -m \"Initial commit\"${NC}"
-    echo ""
-    echo "  6. Push to GitHub:"
-    echo -e "     ${BLUE}gh repo create dotfiles --private --source=. --push${NC}"
-    echo "     ${BLUE}# OR manually: git remote add origin <your-repo-url> && git push -u origin main${NC}"
+    echo "Useful commands:"
+    echo -e "  ${BLUE}check-tools${NC}     - See what tools are installed/missing"
+    echo -e "  ${BLUE}<Space>tw${NC}      - Trim whitespace in Neovim"
+    echo -e "  ${BLUE}<Space>e${NC}       - File explorer in Neovim"
     echo ""
     echo "Your backups (if any) are in: ~/.dotfiles_backup_*"
     echo ""
@@ -334,11 +444,24 @@ main() {
     echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
     echo ""
 
+    # Install core dependencies first (curl/wget, zsh)
+    install_dependencies
     install_stow
     generate_locale
+    
+    # Install development tools
     install_nvim
+    
+    # Install Oh My Zsh (after zsh and curl/wget are installed)
+    install_ohmyzsh
+    
+    # Setup dotfiles
     backup_existing_files
     install_dotfiles
+    
+    # Change shell (after everything is set up)
+    change_default_shell
+    
     show_next_steps
 }
 
