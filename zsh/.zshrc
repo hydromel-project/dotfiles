@@ -101,6 +101,10 @@ plugins=(
   docker-compose
   tmux                      # Tmux shortcuts and completion
   history-substring-search  # Better history search
+  web-search                # Search from terminal (google, ddg, etc)
+  copypath                  # Copy current path to clipboard (copypath)
+  copyfile                  # Copy file content to clipboard (copyfile <file>)
+  aliases                   # Quick alias search (als <keyword>)
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -296,6 +300,9 @@ _setup_eza() {
   alias ll="eza -l --icons --git"
   alias la="eza -la --icons --git"
   alias lt="eza --tree --level=2 --icons"
+  alias lm="eza -la --icons --git --sort=modified"      # Sort by modified time
+  alias lsize="eza -la --icons --git --sort=size"       # Sort by size
+  alias tree="eza --tree --icons"                        # Tree view
 }
 
 _setup_bat() {
@@ -344,6 +351,18 @@ _setup_delta
 _setup_dust
 _setup_procs
 _setup_tldr
+
+# ============================================================================
+# Auto-ls after cd
+# ============================================================================
+chpwd() {
+  emulate -L zsh
+  if [[ $_HAS_EZA -eq 1 ]]; then
+    eza -la --icons --git 2>/dev/null
+  else
+    ls -la
+  fi
+}
 
 # ============================================================================
 # Tool Status & Installation Helper
@@ -720,11 +739,21 @@ alias reload="source ~/.zshrc"
 
 # Git shortcuts
 alias gs="git status"
+alias gst="git status -sb"                                    # Short status with branch
 alias gd="git diff"
+alias gdw="git diff --color-words"                            # Word-level diff
 alias ga="git add"
+alias gaa="git add --all"                                     # Add all changes
 alias gc="git commit"
+alias gcm="git commit -m"                                     # Commit with message
 alias gp="git push"
+alias gpl="git pull"
 alias gl="git log --oneline --graph --decorate"
+alias glog="git log --oneline --graph --decorate --all"      # All branches
+alias gco="git checkout"
+alias gcb="git checkout -b"                                   # Create and checkout branch
+alias gb="git branch"
+alias gba="git branch -a"                                     # All branches including remote
 
 # Directory navigation
 alias ..="cd .."
@@ -735,18 +764,63 @@ alias ....="cd ../../.."
 alias psg="ps aux | grep -v grep | grep -i -e VSZ -e"
 
 # ============================================================================
+# Custom FZF History Widget (populate without executing)
+# ============================================================================
+fzf-history-widget-accept() {
+  local selected
+  selected=$(fc -rl 1 | awk '{$1="";print substr($0,2)}' | \
+    fzf --height 40% --reverse --tiebreak=index --bind=ctrl-r:toggle-sort \
+    --query="${LBUFFER}" \
+    --prompt="History > ")
+
+  if [[ -n "$selected" ]]; then
+    LBUFFER="$selected"
+    zle redisplay
+  fi
+}
+zle -N fzf-history-widget-accept
+
+# ============================================================================
 # Keybindings
 # ============================================================================
-bindkey -s ^f "~/.local/scripts/tmux-sessionizer\n"
+# Custom widget for tmux-sessionizer (execute directly)
+tmux-sessionizer-widget() {
+  BUFFER="~/.local/scripts/tmux-sessionizer"
+  zle accept-line
+}
+zle -N tmux-sessionizer-widget
+bindkey '^f' tmux-sessionizer-widget
+
+# Fuzzy git branch checkout (Ctrl+G)
+fzf-git-branch-widget() {
+  if ! git rev-parse --git-dir > /dev/null 2>&1; then
+    return
+  fi
+
+  local branch
+  branch=$(git branch -a | grep -v HEAD | sed 's/^[* ]*//' | sed 's#remotes/origin/##' | sort -u | fzf --height 40% --reverse --prompt="Git Branch > ")
+
+  if [[ -n "$branch" ]]; then
+    BUFFER="git checkout $branch"
+    zle accept-line
+  fi
+}
+zle -N fzf-git-branch-widget
+bindkey '^g' fzf-git-branch-widget
 
 # Additional useful bindings (if tools exist)
-bindkey '^r' fzf-history-widget      # Ctrl-r: fuzzy history search
+bindkey '^r' fzf-history-widget-accept      # Ctrl-r: fuzzy history search (populate without executing)
 
 # history-substring-search plugin bindings
 bindkey '^[[A' history-substring-search-up      # Up arrow
 bindkey '^[[B' history-substring-search-down    # Down arrow
 bindkey '^P' history-substring-search-up        # Ctrl-p
 bindkey '^N' history-substring-search-down      # Ctrl-n
+
+# Additional productivity keybindings
+bindkey '\e.' insert-last-word                  # Alt+. insert last argument
+bindkey '^U' backward-kill-line                 # Ctrl+U delete to beginning
+bindkey '\e^?' backward-kill-word               # Alt+Backspace delete word backward
 
 # ============================================================================
 # FZF Smart Selector - Helper Functions
@@ -979,3 +1053,20 @@ _check_missing_tools() {
 
 # Run check in background to avoid slowing shell startup
 _check_missing_tools &!
+
+# ============================================================================
+# Direnv - Auto-load .envrc files
+# ============================================================================
+_has_command direnv && eval "$(direnv hook zsh)"
+
+# bun completions
+[ -s "/home/barilc/.bun/_bun" ] && source "/home/barilc/.bun/_bun"
+
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+# ============================================================================
+# Ensure FZF history binding is set (override any defaults)
+# ============================================================================
+bindkey '^r' fzf-history-widget-accept

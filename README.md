@@ -27,7 +27,8 @@ dotfiles/
 ├── git/              # Git configuration
 │   ├── .gitconfig
 │   └── .gitignore_global
-├── nvim/             # Neovim configuration (placeholder)
+├── nvim/             # Neovim configuration (LazyVim)
+│   └── .config/nvim/
 └── install.sh        # Bootstrap script
 ```
 
@@ -62,6 +63,7 @@ stow zsh       # Creates ~/.zshrc, ~/.zsh_productivity, ~/.zsh_cheatsheet
 stow starship  # Creates ~/.config/starship.toml
 stow tmux      # Creates ~/.tmux.conf
 stow git       # Creates ~/.gitconfig and ~/.gitignore_global
+stow nvim      # Creates ~/.config/nvim/
 ```
 
 ## What is GNU Stow?
@@ -151,7 +153,10 @@ git push
 - Status bar customization
 
 ### Neovim Configuration
-- [Your nvim config details]
+- LazyVim distribution (v0.12.0-dev)
+- Modern plugin management with lazy.nvim
+- LSP, treesitter, and comprehensive IDE features
+- Custom configurations in lua/config/ and lua/plugins/
 
 ## Troubleshooting
 
