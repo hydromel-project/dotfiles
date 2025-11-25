@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Bootstrap script for dotfiles installation
-# Usage: curl -sSL https://raw.githubusercontent.com/YOUR_USERNAME/dotfiles/main/bootstrap.sh | bash
+# Usage: curl -sSL https://raw.githubusercontent.com/hydromel-project/dotfiles/main/bootstrap.sh | bash
 #
 
 set -e
@@ -40,7 +40,7 @@ if [[ -d "$DOTFILES_DIR" ]]; then
     git pull origin main
 else
     info "Cloning dotfiles repository..."
-    git clone https://github.com/YOUR_USERNAME/dotfiles.git "$DOTFILES_DIR"
+    git clone https://github.com/hydromel-project/dotfiles.git "$DOTFILES_DIR"
 fi
 
 # Make install script executable

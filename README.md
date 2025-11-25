@@ -36,14 +36,14 @@ dotfiles/
 ### ⚡ One-liner Install
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/YOUR_USERNAME/dotfiles/main/bootstrap.sh | bash
+curl -sSL https://raw.githubusercontent.com/hydromel-project/dotfiles/main/bootstrap.sh | bash
 ```
 
 ### First Time Setup
 
 ```bash
 # Clone this repository
-git clone https://github.com/YOUR_USERNAME/dotfiles.git ~/dotfiles
+git clone https://github.com/hydromel-project/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 
 # Run the installer (installs stow and sets up symlinks)
@@ -112,7 +112,7 @@ stow -R zsh  # Removes old symlinks, creates new ones
 
 ```bash
 # On new machine
-git clone https://github.com/YOUR_USERNAME/dotfiles.git ~/dotfiles
+git clone https://github.com/hydromel-project/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 ./install.sh
 ```
