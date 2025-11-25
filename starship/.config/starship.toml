@@ -138,10 +138,10 @@ show_always = false  # Only show in SSH or if root
 # Hostname
 # ============================================================================
 [hostname]
-ssh_only = true
+ssh_only = false  # Show machine name always
 ssh_symbol = " "
 trim_at = "."
-format = "[@$hostname]($style) "
+format = "[󰌢 $hostname]($style) "
 style = "bold dimmed green"
 disabled = false
 
@@ -595,8 +595,8 @@ disabled = false
 # Local IP
 # ============================================================================
 [localip]
-ssh_only = true
-format = "[@$localipv4]($style) "
+ssh_only = false  # Show local IP always
+format = "[ $localipv4]($style) "
 style = "bold yellow"
 disabled = false
 

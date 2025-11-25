@@ -33,6 +33,12 @@ dotfiles/
 
 ## Quick Start
 
+### ⚡ One-liner Install
+
+```bash
+curl -sSL https://raw.githubusercontent.com/YOUR_USERNAME/dotfiles/main/bootstrap.sh | bash
+```
+
 ### First Time Setup
 
 ```bash
